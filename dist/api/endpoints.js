@@ -39,6 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Router = require("koa-router");
 var appointmentType_1 = require("../appointmentType");
 var endpoints = new Router();
+/**
+ * registers an appointment
+ */
 endpoints.post('/appointment/day', function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
     var appointmentData, serviceAppointment, appointmentRecord, appointmentSaved;
     return __generator(this, function (_a) {
@@ -57,11 +60,23 @@ endpoints.post('/appointment/day', function (ctx, next) { return __awaiter(_this
         return [2 /*return*/];
     });
 }); });
+/**
+ * Removes an day appointment
+ */
 endpoints.del('/appointment/day/:id', function (ctx) {
     var _id = ctx.params.id;
     var serviceAppointment = ctx.container.get("AppointmentService");
-    serviceAppointment.deleteDayById(_id, appointmentType_1.default.DAY);
-    console.log('is', ctx.params.id);
+    var removed = serviceAppointment.deleteDayById(_id, appointmentType_1.default.DAY);
+    if (removed) {
+        ctx.status = 204; // DELETED
+    }
+    else {
+        ctx.status = 404; // NOT FOUND
+        ctx.body = {
+            "message": "resource with id [" + _id + "] not found"
+        };
+    }
+    //console.log('is', ctx.params.id);
 });
 exports.default = endpoints;
 //# sourceMappingURL=endpoints.js.map

@@ -26,7 +26,7 @@ class AppointmentService implements IService<Appointment> {
         const appointment       = new Appointment();
         appointment.type        = data['type'] || null;
         appointment.dayDate     = data['day'] || null;
-        appointment.dayNames    = data['daily'] || null;
+        appointment.dayNames    = data['days'] || null;
         appointment.intervals   = this.buildIntervals( data['intervals'] );
 
         //console.log( 'service.build()', appointment  );

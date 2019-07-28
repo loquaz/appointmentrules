@@ -1,7 +1,7 @@
 enum AppointmentType {
     DAY     = 'day',
     DAILY   = 'daily',
-    WEEK    = 'weekly'
+    WEEKLY    = 'weekly'
 }
 
 export default AppointmentType;

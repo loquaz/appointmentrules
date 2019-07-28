@@ -28,12 +28,15 @@ class JsonDatasource implements IDatasource<Appointment>{
     }
 
     save(model: Appointment) {
+
+        console.log( model.type );
         
         let _collection = this._getCollection( model.type );
+        model.id        = this.generateId();
 
-        model.id = this.generateId();
-        _collection.push(model.toJson());
+        _collection.push( model.toJson() );
         this._saveCollection(model.type, _collection);
+
         console.log( '_collection', _collection );
         return model;
     }    
@@ -48,8 +51,6 @@ class JsonDatasource implements IDatasource<Appointment>{
         
         let _collection     = this._getCollection( type );
         let _removed: any   = null;
-
-        console.log( _collection.length );        
 
         for(let i = 0; i < _collection.length; i++){
 
@@ -67,7 +68,6 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         }
 
-        console.log( _collection.length );
         return false;
         
     }
@@ -108,7 +108,7 @@ class JsonDatasource implements IDatasource<Appointment>{
                 _collection = this._inMemory['appointments']['days']; break;
             case ( AppointmentType.DAILY ) :
                 _collection = this._inMemory['appointments']['daily']; break;
-            case ( AppointmentType.WEEK ) :
+            case ( AppointmentType.WEEKLY ) :
                 _collection = this._inMemory['appointments']['weekly']; break;
             default: 
                 _collection = []; break;
@@ -125,9 +125,9 @@ class JsonDatasource implements IDatasource<Appointment>{
             
             case( AppointmentType.DAY ) :
                 this._inMemory['appointments']['days'] = collection; break;
-            case( AppointmentType.DAY ) :
+            case( AppointmentType.DAILY ) :
                 this._inMemory['appointments']['daily'] = collection; break;
-            case( AppointmentType.DAY ) :
+            case( AppointmentType.WEEKLY ) :
                 this._inMemory['appointments']['weekly'] = collection; break;
             default:
                 _saveInFile = false; break;
@@ -136,6 +136,7 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         if(_saveInFile){
 
+            console.log( 'saveInFile' );
             let _fd = this._fs.openSync(this._storageFile, 'w+');
             this._fs.writeSync( _fd, JSON.stringify( this._inMemory ) );
 

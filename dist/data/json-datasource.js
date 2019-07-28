@@ -46,7 +46,6 @@ var JsonDatasource = /** @class */ (function () {
     JsonDatasource.prototype.deleteById = function (id, type) {
         var _collection = this._getCollection(type);
         var _removed = null;
-        console.log(_collection.length);
         for (var i = 0; i < _collection.length; i++) {
             if (_collection[i]['id'] !== undefined && _collection[i]['id'] === id) {
                 _removed = _collection.splice(i, 1); // removes the object
@@ -57,7 +56,6 @@ var JsonDatasource = /** @class */ (function () {
             this._saveCollection(type, _collection);
             return true;
         }
-        console.log(_collection.length);
         return false;
     };
     JsonDatasource.prototype.exists = function (model) {

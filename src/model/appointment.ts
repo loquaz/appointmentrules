@@ -75,7 +75,7 @@ class Appointment extends BaseModel implements IModel {
                 "intervals" : _intervals
             }
 
-        }else if(this.type === AppointmentType.WEEK){
+        }else if(this.type === AppointmentType.WEEKLY){
 
             _obj = {
                 "id" : this.id,
