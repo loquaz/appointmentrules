@@ -1,0 +1,41 @@
+{"appointments":
+    {
+        "days":
+        [
+            {
+                "id": "ask7s8as64s5as",
+                "day":"01-01-2019",
+                "intervals":[
+                    {"start":"08:00","end":"12:00"}
+                ]
+            },
+            {   
+                "id": "ua761hgd628has",
+                "day":"25-01-2019",
+                "intervals":[
+                    {"start":"15:00","end":"17:00"}
+                ]
+            }
+        ],
+        "daily":
+        [
+            {
+                "id": "ua761hgd628has",
+                "intervals":[
+                    {"start":"08:00","end":"12:00"}
+                ]
+            }
+        ],
+        "weekly":
+        [
+            {
+                "id":"ask7s8as64s5as",
+                "days":["seg","qua"],
+                "intervals":[
+                    {"start":"08:00","end":"12:00"},
+                    {"start":"08:00","end":"12:00"}
+                ]
+            }
+        ]
+    }
+}
