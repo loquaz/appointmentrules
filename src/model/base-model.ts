@@ -12,8 +12,6 @@ abstract class BaseModel {
      * @param value 
      */
     addError(msg: string, field: string, value: string) : void {
-
-        console.log( ':( erro' );        
         this._errors.push( new ModelError( msg, field, value )  );
     }
 
@@ -30,12 +28,12 @@ class ModelError {
 
     message : string;
     field : string;
-    value: string;
+    originalValue: string;
 
     constructor(msg: string, field: string, value: string){
-        this.message    = msg;
-        this.field      = field;
-        this.value      = value;
+        this.message        = msg;
+        this.field          = field;
+        this.originalValue  = value;
     }
 
 }
