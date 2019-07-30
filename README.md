@@ -205,3 +205,23 @@
     "errorMessage": "Daily appointment already exists"
 }
 ```
+
+<a name="del-daily"></a>
+
+##  Remover regra de horários diários
+* Método de requisição: **DELETE**
+* Path: **/appointment/daily/:id**
+* Exemplo de resposta BEM sucedida
+    * Status: **204** | **No Content**
+    * Body: **vazio**
+* Exemplo de resposta MAL sucedida
+    * Status: **400** | **Bad Rquest**
+    * Body:
+```json
+{
+    "status": 404,
+    "errorCode": 5,
+    "errorType": "Resource not found",
+    "errorMessage": "resource with id {MUm7Ptoxv} not found"
+}
+```
