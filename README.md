@@ -59,9 +59,9 @@
 
 ##  Listar todos os dias disponíveis
 * Método de requisição: **GET**
-* Path: **/appointment/days/**
+* Path: **/appointment/days**
 * Exemplo de resposta BEM sucedida
-    * Status: **204** | **No Content**
+    * Status: **200** | **OK**
     * Body:
 ```json
 [
@@ -94,14 +94,52 @@
     }
 ]
 ```
+
+##  Listar horários disponíveis entre um intervalo específico
+* Método de requisição: **GET**
+* Path: **/appointment/available/:initDate:endDate**
+* Exemplo de resposta BEM sucedida
+    * Status: **200** | **OK**
+    * Body:
+```json
+[
+    {
+        "day": "16-06-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    },
+    {
+        "day": "26-06-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    },
+    {
+        "day": "29-07-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    }
+]
+```
 * Exemplo de resposta MAL sucedida
     * Status: **400** | **Bad Rquest**
     * Body:
 ```json
 {
-    "status": 404,
-    "errorCode": 5,
-    "errorType": "Resource not found",
-    "errorMessage": "resource with id {WWizTAl0g} not found"
+    "status": 400,
+    "errorCode": 3,
+    "errorType": "Request Error",
+    "errorMessage": "16-16-2018, 29-07-2018 or both are invalid dates"
 }
 ```
