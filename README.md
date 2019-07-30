@@ -34,7 +34,7 @@ $> npm run watch-server
 ├── Dockerfile
 ├── README.md
 ├── package.json
-├── tsconfig.json
+└── tsconfig.json
 ```
 
 ## Endpoints 
