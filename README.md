@@ -56,3 +56,52 @@
     "errorMessage": "resource with id {WWizTAl0g} not found"
 }
 ```
+
+##  Listar todos os dias disponíveis
+* Método de requisição: **GET**
+* Path: **/appointment/days/**
+* Exemplo de resposta BEM sucedida
+    * Status: **204** | **No Content**
+    * Body:
+```json
+[
+    {
+        "day": "15-06-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    },
+    {
+        "day": "16-06-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    },   
+    {
+        "day": "02-08-2018",
+        "intervals": [
+            {
+                "start": "05:00",
+                "end": "07:30"
+            }
+        ]
+    }
+]
+```
+* Exemplo de resposta MAL sucedida
+    * Status: **400** | **Bad Rquest**
+    * Body:
+```json
+{
+    "status": 404,
+    "errorCode": 5,
+    "errorType": "Resource not found",
+    "errorMessage": "resource with id {WWizTAl0g} not found"
+}
+```
