@@ -38,3 +38,23 @@
     "errorMessage": "Day appointment already exists"
 }
 ```
+
+##  Remover dia específico
+* Método de requisição: **DELETE**
+* Path: **/appointment/day/:id**
+
+* Exemplo de resposta BEM sucedida
+* Status: **204** | **No Content**
+* Body: **vazio**
+
+* Exemplo de resposta MAL sucedida
+* Status: **400** | **Bad Rquest**
+**body** :
+```json
+{
+    "status": 404,
+    "errorCode": 5,
+    "errorType": "Resource not found",
+    "errorMessage": "resource with id {WWizTAl0g} not found"
+}
+```
