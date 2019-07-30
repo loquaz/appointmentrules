@@ -225,3 +225,28 @@
     "errorMessage": "resource with id {MUm7Ptoxv} not found"
 }
 ```
+
+<a name="list-daily"></a>
+
+##  Listar regra de horários diários
+* Método de requisição: **GET**
+* Path: **/appointment/daily**
+* Exemplo de resposta BEM sucedida
+    * Status: **200** | **OK**
+    * Body:
+```json
+[
+    {
+        "intervals": [
+            {
+                "start": "08:10",
+                "end": "09:00"
+            },
+            {
+                "start": "10:00",
+                "end": "11:00"
+            }
+        ]
+    }
+]
+```
