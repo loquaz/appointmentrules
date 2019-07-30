@@ -32,7 +32,6 @@ var Interval = /** @class */ (function (_super) {
         else if (!_start.isBefore(_end)) {
             return false;
         }
-        console.log('interval is valid');
         return true;
     };
     Interval.prototype.toString = function () {

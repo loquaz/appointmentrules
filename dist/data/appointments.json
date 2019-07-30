@@ -1,1 +1,7 @@
-{"appointments":{"days":[{"day":"01-01-2019","intervals":[{"start":"08:00","end":"12:00"}]},{"day":"25-01-2019","intervals":[{"start":"15:00","end":"17:00"}]},{"id":"SFOYR1d-N","day":"15-09-2019","intervals":[{"start":"15:00","end":"17:00"}]},{"id":"AoKU8YnMP","day":"15-09-2019","intervals":[{"start":"15:00","end":"17:00"}]},{"id":"9XtRuW1FX","day":"52-01-2019","intervals":[{"start":"15:00","end":"17:00"}]},{"id":"i1PxTVWvh","day":"52-01-2019","intervals":[{"start":"15:00","end":"17:00"}]}],"daily":{"intervals":[{"start":"08:00","end":"12:00"}]},"weekly":[{"days":["seg","qua"],"intervals":[{"start":"08:00","end":"12:00"},{"start":"08:00","end":"12:00"}]}]}}
+{
+    "appointments": {
+        "days": [],
+        "daily": [],
+        "weekly": []
+    }
+}

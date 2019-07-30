@@ -2,34 +2,34 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var BaseModel = /** @class */ (function () {
     function BaseModel() {
-        this._errors = [];
     }
     /**
-     * Add a model error
+     * Set an error
      *
-     * @param msg
+     * @param message
      * @param field
-     * @param value
+     * @param originalValue
      */
-    BaseModel.prototype.addError = function (msg, field, value) {
-        console.log(':( erro');
-        this._errors.push(new ModelError(msg, field, value));
+    BaseModel.prototype.setError = function (message, field, originalValue) {
+        this._error = new ModelError(message, field, originalValue);
     };
     /**
-     *  Returns all model errors
-     *
+     *  Return the error
      */
-    BaseModel.prototype.getErrors = function () {
-        return this._errors;
+    BaseModel.prototype.getError = function () {
+        return this._error.toString();
     };
     return BaseModel;
 }());
 var ModelError = /** @class */ (function () {
     function ModelError(msg, field, value) {
-        this.message = msg;
-        this.field = field;
-        this.value = value;
+        this._message = msg;
+        this._field = field;
+        this._originalValue = value;
     }
+    ModelError.prototype.toString = function () {
+        return this._message + ", {" + this._field + "}, " + this._originalValue;
+    };
     return ModelError;
 }());
 exports.default = BaseModel;

@@ -19,25 +19,36 @@ var AppointmentRepository = /** @class */ (function () {
     }
     AppointmentRepository.prototype.save = function (model) {
         return this._ds.save(model);
-        //console.log( 'repository.save()', this._ds.find( model ) );
     };
-    AppointmentRepository.prototype.find = function (model) {
-        throw new Error("Method not implemented.");
+    AppointmentRepository.prototype.findAll = function (type) {
+        return this._ds.findAll(type);
     };
-    AppointmentRepository.prototype.findById = function (id) {
-        throw new Error("Method not implemented.");
-    };
-    AppointmentRepository.prototype.findByDay = function (day) {
-        throw new Error("Method not implemented.");
-    };
-    AppointmentRepository.prototype.findByInterval = function (interval) {
-        throw new Error("Method not implemented.");
-    };
-    AppointmentRepository.prototype.findByDayNames = function (daynames) {
-        throw new Error("Method not implemented.");
+    AppointmentRepository.prototype.findByDate = function (date) {
+        return this._ds.findByDate(date);
     };
     AppointmentRepository.prototype.deleteById = function (id, type) {
         return this._ds.deleteById(id, type);
+    };
+    AppointmentRepository.prototype.addIntervalsToDay = function (dayId, intervals) {
+        return this._ds.addIntervalsToDay(dayId, intervals);
+    };
+    AppointmentRepository.prototype.addIntervalsToDaily = function (intervals) {
+        return this._ds.addIntervalsToDaily(intervals);
+    };
+    AppointmentRepository.prototype.addIntervalsToWeekly = function (intervals) {
+        return this._ds.addIntervalsToWeekly(intervals);
+    };
+    AppointmentRepository.prototype.addDaysToWeekly = function (days) {
+        return this._ds.addDaysToWeekly(days);
+    };
+    AppointmentRepository.prototype.getDaily = function () {
+        return this._ds.getDaily();
+    };
+    AppointmentRepository.prototype.getWeekly = function () {
+        return this._ds.getWeekly();
+    };
+    AppointmentRepository.prototype.getAppointmentsBetween = function (initDate, endDate) {
+        return this._ds.getAppointmentsBetween(initDate, endDate);
     };
     AppointmentRepository = __decorate([
         inversify_1.injectable(),
