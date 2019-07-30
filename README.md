@@ -1,4 +1,7 @@
-# Endpoints [Router](#exp_module_koa-router--Router) 
+# Endpoints  
+    * [Adicionar um dia específico](#add-day)
+
+<a name="add-day"></a>
 
 ##  Adicionar um dia específico
 * Método de requisição: **POST**
@@ -143,5 +146,3 @@
     "errorMessage": "16-16-2018, 29-07-2018 or both are invalid dates"
 }
 ```
-
-<a name="exp_module_koa-router--Router"></a>
