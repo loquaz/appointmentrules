@@ -3,6 +3,13 @@
    * [Remover um dia específico](#del-day)
    * [Listar todos os dias disponíveis](#list-all)
    * [Listar horários disponíveis em intervalo de datas](#list-range)
+   * [Adicionar horários diariámente](#add-daily)
+   * [Remover regra de horários diários](#del-daily)
+   * [Listar regra de horários diários](#list-daily)
+   * [Adicionar horários semanalmente](#add-weekly)
+   * [Remover regra de horários semanais](#del-weekly)
+   * [Listar regra de horários semanais](#list-weekly)
+   
    
 
 <a name="add-day"></a>
