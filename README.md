@@ -1,3 +1,12 @@
+## Instalação/Deploy
+
+Visando facilitar o deploy da aplicação, adicionei à raiz do projeto um arquivo Dockerfile e outro docker-compose.yml. O primeiro deve ser utilizado para construir a imagem, e o segundo para levantar uma instancia (container) desta imagem.
+Para a correta instalação siga os passos:
+1 – Construção da imagem executando o commando na raiz do projeto.
+docker build -t cubos .
+2 – Levantar o container com o comando
+docker-compose up -d
+
 # Endpoints 
    * [Adicionar um dia específico](#add-day)
    * [Remover um dia específico](#del-day)
