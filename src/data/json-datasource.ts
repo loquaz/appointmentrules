@@ -5,7 +5,7 @@ import { injectable } from "inversify";
 import "reflect-metadata";
 import * as shortid from 'shortid';
 import Appointment from "../model/appointment";
-import AppointmentType from "../appointmentType";
+import AppointmentType from "../common/appointmentType";
 import * as moment from 'moment';
 import Interval from "../model/interval";
 
@@ -18,7 +18,7 @@ class JsonDatasource implements IDatasource<Appointment>{
      
     constructor(){
         try{
-            this._inMemory = JSON.parse( this._fs.readFileSync(this._storageFile, 'utf-8') );
+            this._inMemory = JSON.parse( this._fs.readFileSync( this._storageFile, 'utf-8' ) );
             //console.log( this._inMemory['appointments'] ); 
         }catch(error){
             console.log(error.message);
@@ -31,20 +31,17 @@ class JsonDatasource implements IDatasource<Appointment>{
 
     save(model: Appointment) {
 
-        console.log( model.type );
-        
         let _collection = this._getCollection( model.type );
         model.id        = this.generateId();
 
         _collection.push( model.toJson() );
         this._saveCollection(model.type, _collection);
 
-        console.log( '_collection', _collection );
         return model;
     }    
 
     /**
-     * Removes an item from a specific denoted by type collection by id
+     * Removes a specific item by id denoted by the type of collection
      * 
      * @param id 
      * @param type 
@@ -73,35 +70,12 @@ class JsonDatasource implements IDatasource<Appointment>{
         return false;
         
     }
-
-    exists( model: Appointment ) : boolean{
-        return false;
-    }
-
-    find(model: Appointment) : Appointment {
-
-        // if the type is day
-        let _days = this._inMemory['appointments']['days'];
-        let _storedDay;
-        
-        for(let i = 0; i < _days.length; i++){
-            //console.log('_days[i]');
-            if(model.dayDate === _days[i]['dayDate']){
-                //console.log('-->');
-                _storedDay = _days[i];
-                return _storedDay;
-                //console.log( 'JsonDatasource.find()', model);
-            }            
-        }; 
-
-        return null;
-    } 
-
+   
     findAll(type: string) : Appointment[] {
         
         let _collection = this._getCollection( type );
 
-        if(type === AppointmentType.DAY){
+        if( type === AppointmentType.DAY ){
             
             let _sortedAppointmentsData = this._sortDayCollection( _collection );
             let _appointments           = _sortedAppointmentsData.map( data => {
@@ -114,11 +88,52 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         }else if( type === AppointmentType.DAILY ) {
 
+            let _collection = this._getCollection( AppointmentType.DAILY );
+            let _data       = _collection[0];
 
+            if(!_data)
+                return [];
+
+            let _appointments       = [];
+            let _appointment        = new Appointment();
+            _appointment.id         = _data['id'];
+            _appointment.type       = AppointmentType.DAILY;
+            _appointment.intervals  = _data['intervals'].map(interval=>{
+
+                return new Interval( interval['start'], interval['end']);
+
+            });
+
+            _appointments.push( _appointment );
+            
+            return _appointments;
+
+        } else if( type === AppointmentType.WEEKLY ) {
+
+            let _collection         = this._getCollection( AppointmentType.WEEKLY );
+            let _data               = _collection[0];
+
+            if(!_data)
+                return [];
+
+            let _appointments       = [];
+            let _appointment        = new Appointment();
+            _appointment.id         = _data['id'];
+            _appointment.type       = AppointmentType.WEEKLY;
+            _appointment.dayNames   = _data['days'];
+            _appointment.intervals  = _data['intervals'].map(interval=>{
+
+                return new Interval( interval['start'], interval['end']);
+
+            });
+            
+            _appointments.push( _appointment );
+            
+            return _appointments;
 
         }
 
-        return null;
+        return [];
 
     }
 
@@ -178,7 +193,7 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         if(_saveInFile){
 
-            console.log( 'saveInFile' );
+            // console.log( 'saveInFile' );
             let _fd = this._fs.openSync(this._storageFile, 'w+');
             this._fs.writeSync( _fd, JSON.stringify( this._inMemory ) );
             
@@ -268,7 +283,7 @@ class JsonDatasource implements IDatasource<Appointment>{
         }
         return null;
     }
-
+    
     addIntervalsToDaily(intervals: Interval[]): Appointment{
 
         let _collection = this._getCollection( AppointmentType.DAILY );
@@ -284,6 +299,57 @@ class JsonDatasource implements IDatasource<Appointment>{
         let _appointment        = new Appointment();
         _appointment.type       = AppointmentType.DAILY;
         _appointment.id         = _data['id'];
+        _appointment.intervals  = _data['intervals'].map(interval=>{
+            return new Interval( interval['start'], interval['end'] );
+        });
+
+        return _appointment;
+    }
+
+    addIntervalsToWeekly(intervals: Interval[]): Appointment{
+
+        let _collection = this._getCollection( AppointmentType.WEEKLY );
+        let _data       = _collection[0];
+        intervals.map( i =>{
+            _data['intervals'].push( i.toJson() );
+        });
+
+        // save updates
+        _collection[0] = _data;
+        this._saveCollection( AppointmentType.WEEKLY, _collection );
+
+        let _appointment        = new Appointment();
+        _appointment.type       = AppointmentType.WEEKLY;
+        _appointment.id         = _data['id'];
+        _appointment.dayNames   = _data['days'];
+        _appointment.intervals  = _data['intervals'].map(interval=>{
+            return new Interval( interval['start'], interval['end'] );
+        });
+
+        return _appointment;
+    }
+
+    addDaysToWeekly(days: string[]) : Appointment {
+
+        let _collection     = this._getCollection( AppointmentType.WEEKLY );
+        let _data           = _collection[0];
+        let _daysCollection = _data['days'] || null;  
+
+        if(!_daysCollection)
+            return null;
+
+        days.map( day => {
+            _daysCollection.push( day );
+        });
+
+        _data['days']   = _daysCollection;
+        _collection[0]  = _data;
+        this._saveCollection( AppointmentType.WEEKLY, _collection );
+        
+        let _appointment        = new Appointment();
+        _appointment.type       = AppointmentType.WEEKLY;
+        _appointment.id         = _data['id'];
+        _appointment.dayNames   = _data['days'];
         _appointment.intervals  = _data['intervals'].map(interval=>{
             return new Interval( interval['start'], interval['end'] );
         });
@@ -329,8 +395,8 @@ class JsonDatasource implements IDatasource<Appointment>{
 
     getDaily() : Appointment { 
 
-        let _collection         = this._getCollection( AppointmentType.DAILY );
-        let _data               = _collection[0];
+        let _collection = this._getCollection( AppointmentType.DAILY );
+        let _data       = _collection[0];
         
         if(!_data) 
             return null;
@@ -341,8 +407,26 @@ class JsonDatasource implements IDatasource<Appointment>{
         _appointment.intervals  = _data['intervals'].map(interval=>{
             return new Interval( interval['start'], interval['end'] );
         });
-        console.log('JsonDatasource.getDaily()', _appointment);
         return _appointment;
+    }
+
+    getWeekly() : Appointment {
+
+        let _collection = this._getCollection( AppointmentType.WEEKLY );
+        let _data       = _collection[0];
+        
+        if(!_data) 
+            return null;
+
+        let _appointment        = new Appointment();
+        _appointment.type       = AppointmentType.WEEKLY;
+        _appointment.id         = _data['id'];
+        _appointment.dayNames   = _data['days']; 
+        _appointment.intervals  = _data['intervals'].map(interval=>{
+            return new Interval( interval['start'], interval['end'] );
+        });
+        return _appointment;
+
     }
 
     getAppointmentsBetween(initDate: string, endDate: string) : Appointment[] {
@@ -392,10 +476,11 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         }
 
-        console.log( 'initIdx', _initIdx,'endtIdx', _endIdx, );
+        //console.log( 'initIdx', _initIdx,'endtIdx', _endIdx, );
 
         return _appointments;
     }
 
 }
+
 export default JsonDatasource;

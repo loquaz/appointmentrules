@@ -47,7 +47,6 @@ class AppointmentApp {
         server.use( endpoints.routes() );
         server.listen( 3001 );
         
-
         //console.log( container.get("AppointmentService") );
 
     }

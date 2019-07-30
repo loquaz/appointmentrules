@@ -15,36 +15,19 @@ class AppointmentRepository implements IRepository<Appointment>{
 
     save(model: Appointment) : Appointment {
 
-        return this._ds.save( model );        
-        //console.log( 'repository.save()', this._ds.find( model ) );
-                
+        return this._ds.save( model ); 
+                        
     }
-
-    find(model: Appointment): Appointment {
-        throw new Error("Method not implemented.");
-    } 
 
     findAll(type: string) : Appointment[] {
 
         return this._ds.findAll( type );
     
-    }
+    }    
     
-    findById(id: String): Appointment {
-        throw new Error("Method not implemented.");
-    }
-
     findByDate(date: string): Appointment {
 
         return this._ds.findByDate( date );
-    }
-
-    findByInterval(interval: string): Appointment {
-        throw new Error("Method not implemented.");
-    }
-
-    findByDayNames(daynames: string): Appointment {
-        throw new Error("Method not implemented.");
     }
     
     deleteById(id: string, type: string) : boolean {
@@ -65,8 +48,26 @@ class AppointmentRepository implements IRepository<Appointment>{
 
     }
 
+    addIntervalsToWeekly(intervals: Interval[]): Appointment {
+
+        return this._ds.addIntervalsToWeekly( intervals );
+
+    }
+
+    addDaysToWeekly(days: string[]): Appointment {
+
+        return this._ds.addDaysToWeekly( days );
+
+    }
+
     getDaily() : Appointment {
         return this._ds.getDaily();
+    }
+
+    getWeekly() : Appointment {
+
+        return this._ds.getWeekly();
+
     }
 
     getAppointmentsBetween( initDate: string, endDate: string ) : Appointment[] {
