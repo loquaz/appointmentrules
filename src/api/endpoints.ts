@@ -1,9 +1,9 @@
 import * as Router from 'koa-router';
 import { id } from 'inversify';
-import AppointmentType from '../appointmentType';
+import AppointmentType from '../common/appointmentType';
 import Appointment from '../model/appointment';
 import * as moment from 'moment';
-import RequestError from './request-error';
+import ApplicationError, {  ErrorTypes, ErrorCodes, HttpStatusCodes } from '../common/application-error';
 
 const endpoints = new Router();
 
@@ -22,9 +22,7 @@ endpoints.get('/appointment/days', async (ctx, next) => {
     }); 
     
     ctx.body = response;
-
-    console.log( response );
-
+    
 });
 
 /**
@@ -38,26 +36,30 @@ endpoints.post('/appointment/day', async (ctx, next) => {
 
 
     if(appointmentRecord.type !== AppointmentType.DAY){
-
-        const reqError  = new RequestError(400, "type", appointmentRecord.type, "Wrong type especified");
-        ctx.status      = 400; // BAD REQUEST
-        ctx.body        = reqError.getError(); 
+        
+        const errorMsg  = `Wrong type specified {${appointmentRecord.type}}`;
+        const error     = new ApplicationError(400, ErrorTypes.BAD_REQUEST, ErrorCodes.BAD_REQUEST, errorMsg);
+        ctx.status      = HttpStatusCodes.BAD_REQUEST;
+        ctx.body        = error.getError(); 
 
     }else if( !appointmentRecord.validate() ){
+
+        console.log('endpoint');
         
-        ctx.status  = 400; // BAD REQUEST
-        ctx.body    = appointmentRecord.getErrors();
-        console.log( appointmentRecord.getErrors() );
+        const errorMsg  = appointmentRecord.getError();
+        const error     = new ApplicationError(400, ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, errorMsg);
+        ctx.status      = HttpStatusCodes.OK;
+        ctx.body        = error.getError();        
 
     }else{
 
         const appointmentSaved  = serviceAppointment.create( appointmentRecord );
 
-        if( appointmentSaved && appointmentSaved.getErrors().length > 0 ){
+        if( appointmentSaved && serviceAppointment.getError() ){
 
-            ctx.status  = 400; // BAD REQUEST
-            ctx.body    = appointmentRecord.getErrors();
-            console.log( appointmentRecord.getErrors() );
+            const error     = ApplicationError.buildFromBaseError( serviceAppointment.getError(), 400 );
+            ctx.status      = 400; // BAD REQUEST
+            ctx.body        = error;            
 
         }else if( appointmentSaved ){
             ctx.body = appointmentSaved.toJson();
@@ -78,20 +80,22 @@ endpoints.del('/appointment/day/:id', (ctx) =>{
 
     if(removed){
 
-        ctx.status = 204 // DELETED
+        ctx.status = HttpStatusCodes.NO_CONTENT // DELETED
 
     }else{
 
-        ctx.status  = 404 // NOT FOUND
-        ctx.body    = {
-            "message" : `resource with id [${_id}] not found`
-        }
+        const errorMsg  = `resource with id {${_id}} not found`;
+        const error     = new ApplicationError(404, ErrorTypes.NOT_FOUND, ErrorCodes.NOT_FOUND, errorMsg);
+        ctx.status      = HttpStatusCodes.NOT_FOUND;
+        ctx.body        = error.getError();        
 
     }
     
-    //console.log('id', ctx.params.id);
 });
 
+/**
+ * Retrieves all appointments between the suplieds init and end dates
+ */
 endpoints.get('/appointment/available/:initdate/:enddate', (ctx)=>{
     
     let _initDateParam  = ctx.params.initdate;
@@ -101,12 +105,17 @@ endpoints.get('/appointment/available/:initdate/:enddate', (ctx)=>{
     
     if( !_initDate.isValid() || !_endDate.isValid() ){
 
-        // TODO mensagem de erro
+        const errorMsg  = `${_initDateParam}, ${_endDateParam} or both are invalid dates`;
+        const error     = new ApplicationError(400, ErrorTypes.BAD_REQUEST, ErrorCodes.BAD_REQUEST, errorMsg);
+        ctx.status      = HttpStatusCodes.OK;
+        ctx.body        = error.getError();
 
     }else if( _initDate.isAfter( _endDate ) ){
 
-        // TODO mensagem de erro
-        console.log('opa')
+        const errorMsg  = `${_initDateParam} can\'t be greater than ${_endDateParam}`;
+        const error     = new ApplicationError(400, ErrorTypes.BAD_REQUEST, ErrorCodes.BAD_REQUEST, errorMsg);
+        ctx.status      = HttpStatusCodes.OK;
+        ctx.body        = error.getError();
         
     }else{
 
@@ -134,7 +143,7 @@ endpoints.get('/appointment/available/:initdate/:enddate', (ctx)=>{
                             DAILY
 ===============================================================*/
 /**
- * get all daily appointments
+ * get daily appointment
  */
 endpoints.get('/appointment/daily', async (ctx, next) => {
   
@@ -146,48 +155,49 @@ endpoints.get('/appointment/daily', async (ctx, next) => {
     
     ctx.body = response;
 
-    console.log( response );
-
 });
 
 /**
  * registers a daily appointment
  */
 endpoints.post('/appointment/daily', async (ctx, next) => {
-  
-    const appointmentData       = ctx.request.body;
-    const serviceAppointment    = ctx.container.get("AppointmentService");
-    const appointmentRecord     = serviceAppointment.build( appointmentData );
+     
+   const appointmentData       = ctx.request.body;
+   const serviceAppointment    = ctx.container.get("AppointmentService");
+   const appointmentRecord     = serviceAppointment.build( appointmentData );
 
-    if(appointmentRecord.type !== AppointmentType.DAILY){
 
-        ctx.status  = 400; // BAD REQUEST
-        ctx.body    = {
-            "message" : "Wrong type especified" 
-        } 
+   if(appointmentRecord.type !== AppointmentType.DAILY){
+       
+       const errorMsg  = `Wrong type specified {${appointmentRecord.type}}`;
+       const error     = new ApplicationError(400, ErrorTypes.BAD_REQUEST, ErrorCodes.BAD_REQUEST, errorMsg);
+       ctx.status      = HttpStatusCodes.BAD_REQUEST;
+       ctx.body        = error.getError(); 
 
-    }else if( !appointmentRecord.validate() ){
-        
-        ctx.response.status = 400; // BAD REQUEST
-        ctx.body            = appointmentRecord.getErrors();
-        console.log( appointmentRecord.getErrors() );
+   }else if( !appointmentRecord.validate() ){
 
-    }else{
+       console.log('endpoint daily');
+       
+       const errorMsg  = appointmentRecord.getError();
+       const error     = new ApplicationError(400, ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, errorMsg);
+       ctx.status      = HttpStatusCodes.OK;
+       ctx.body        = error.getError();        
 
-        const appointmentSaved  = serviceAppointment.create( appointmentRecord );
-        //ctx.body                = appointmentSaved.toJson();
+   }else{
 
-        if( appointmentSaved && appointmentSaved.getErrors().length > 0 ){
+       const appointmentSaved  = serviceAppointment.create( appointmentRecord );
 
-            ctx.status  = 400; // BAD REQUEST
-            ctx.body    = appointmentRecord.getErrors();
-            console.log( appointmentRecord.getErrors() );
+       if( appointmentSaved && serviceAppointment.getError() ){
 
-        }else if( appointmentSaved ){
-            ctx.body = appointmentSaved.toJson();
-        }
+           const error     = ApplicationError.buildFromBaseError( serviceAppointment.getError(), 400 );
+           ctx.status      = 400; // BAD REQUEST
+           ctx.body        = error;            
 
-    }  
+       }else if( appointmentSaved ){
+           ctx.body = appointmentSaved.toJson();
+       }
+
+   }
 
 });
 
@@ -202,14 +212,14 @@ endpoints.del('/appointment/daily/:id', (ctx) =>{
 
     if(removed){
 
-        ctx.status = 204 // DELETED
+        ctx.status = HttpStatusCodes.NO_CONTENT // DELETED
 
     }else{
 
-        ctx.status  = 404 // NOT FOUND
-        ctx.body    = {
-            "message" : `resource with id [${_id}] not found`
-        }
+        const errorMsg  = `resource with id {${_id}} not found`;
+        const error     = new ApplicationError(404, ErrorTypes.NOT_FOUND, ErrorCodes.NOT_FOUND, errorMsg);
+        ctx.status      = HttpStatusCodes.NOT_FOUND;
+        ctx.body        = error.getError();        
 
     }
     
@@ -221,33 +231,61 @@ endpoints.del('/appointment/daily/:id', (ctx) =>{
                             WEEKLY
 ===============================================================*/
 /**
+ * get weekly appointment
+ */
+endpoints.get('/appointment/weekly', async (ctx, next) => {
+  
+    const serviceAppointment            = ctx.container.get("AppointmentService");
+    const appointments: Appointment[]   = serviceAppointment.getWeekly();
+    const response                      = appointments.map( appointment => {
+        return appointment.toJsonWithoutId();
+    }); 
+    
+    ctx.body = response;
+
+});
+
+/**
  * registers a weekly appointment
  */
 endpoints.post('/appointment/weekly', async (ctx, next) => {
   
-    const appointmentData       = ctx.request.body;
-    const serviceAppointment    = ctx.container.get("AppointmentService");
-    const appointmentRecord     = serviceAppointment.build( appointmentData );
+   const appointmentData       = ctx.request.body;
+   const serviceAppointment    = ctx.container.get("AppointmentService");
+   const appointmentRecord     = serviceAppointment.build( appointmentData );
 
-    if(appointmentRecord.type !== AppointmentType.WEEKLY){
 
-        ctx.status  = 400; // BAD REQUEST
-        ctx.body    = {
-            "message" : "Wrong type especified" 
-        } 
+   if(appointmentRecord.type !== AppointmentType.WEEKLY){
+       
+       const errorMsg  = `Wrong type specified {${appointmentRecord.type}}`;
+       const error     = new ApplicationError(400, ErrorTypes.BAD_REQUEST, ErrorCodes.BAD_REQUEST, errorMsg);
+       ctx.status      = HttpStatusCodes.BAD_REQUEST;
+       ctx.body        = error.getError(); 
 
-    }else if( !appointmentRecord.validate() ){
-        
-        ctx.response.status = 400; // BAD REQUEST
-        ctx.body            = appointmentRecord.getErrors();
-        console.log( appointmentRecord.getErrors() );
+   }else if( !appointmentRecord.validate() ){
 
-    }else{
+       console.log('endpoint weekly');
+       
+       const errorMsg  = appointmentRecord.getError();
+       const error     = new ApplicationError(400, ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, errorMsg);
+       ctx.status      = HttpStatusCodes.OK;
+       ctx.body        = error.getError();        
 
-        const appointmentSaved  = serviceAppointment.create( appointmentRecord );
-        ctx.body                = appointmentSaved.toJson();
+   }else{
 
-    }  
+       const appointmentSaved  = serviceAppointment.create( appointmentRecord );
+
+       if( appointmentSaved && serviceAppointment.getError() ){
+
+           const error     = ApplicationError.buildFromBaseError( serviceAppointment.getError(), 400 );
+           ctx.status      = 400; // BAD REQUEST
+           ctx.body        = error;            
+
+       }else if( appointmentSaved ){
+           ctx.body = appointmentSaved.toJson();
+       }
+
+   }
 
 });
 
@@ -262,14 +300,14 @@ endpoints.del('/appointment/weekly/:id', (ctx) =>{
 
     if(removed){
 
-        ctx.status = 204 // DELETED
+        ctx.status = HttpStatusCodes.NO_CONTENT // DELETED
 
     }else{
 
-        ctx.status  = 404 // NOT FOUND
-        ctx.body    = {
-            "message" : `resource with id [${_id}] not found`
-        }
+        const errorMsg  = `resource with id {${_id}} not found`;
+        const error     = new ApplicationError(404, ErrorTypes.NOT_FOUND, ErrorCodes.NOT_FOUND, errorMsg);
+        ctx.status      = HttpStatusCodes.NOT_FOUND;
+        ctx.body        = error.getError();        
 
     }
     
