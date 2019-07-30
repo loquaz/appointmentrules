@@ -162,7 +162,6 @@
 }
 ```
 
-
 <a name="add-daily"></a>
 
 ##  Adicionar horários diáriamente
@@ -245,6 +244,109 @@
             {
                 "start": "10:00",
                 "end": "11:00"
+            }
+        ]
+    }
+]
+```
+
+<a name="add-weekly"></a>
+
+##  Adicionar horários semanalmente
+* Método de requisição: **POST**
+* Path: **/appointment/weekly**
+* Header: **Content-Type : application/json**
+* Body: 
+```json
+{
+	"type" : "weekly",
+	"days" : ["segunda", "quarta", "quinta", "sexta", "sabado"],
+	"intervals" : [{"start": "12:00", "end": "16:00"}, {"start":"16:01", "end":"17:00"}]
+}
+```
+* Exemplo de resposta BEM sucedida
+    * Status: **200** | **OK**
+    * Body:
+```json
+{
+    "id": "6mW7brT13",
+    "days": [
+        "segunda",
+        "quarta",
+        "sexta",
+        "quinta",
+        "sabado"
+    ],
+    "intervals": [
+        {
+            "start": "12:00",
+            "end": "16:00"
+        },
+        {
+            "start": "16:01",
+            "end": "17:00"
+        }
+    ]
+}
+```
+* Exemplo de resposta MAL sucedida
+    * Status: **400** | **Bad Rquest**
+    * Body:
+```json
+{
+    "status": 400,
+    "errorCode": 2,
+    "errorType": "Resource already exists",
+    "errorMessage": "Weekly appointment already exists"
+}
+```
+
+<a name="del-weekly"></a>
+
+##  Remover regra de horários semanais
+* Método de requisição: **DELETE**
+* Path: **/appointment/weekly/:id**
+* Exemplo de resposta BEM sucedida
+    * Status: **204** | **No Content**
+    * Body: **vazio**
+* Exemplo de resposta MAL sucedida
+    * Status: **400** | **Bad Rquest**
+    * Body:
+```json
+{
+    "status": 404,
+    "errorCode": 5,
+    "errorType": "Resource not found",
+    "errorMessage": "resource with id {MUm7Ptoxv} not found"
+}
+```
+
+<a name="list-weekly"></a>
+
+##  Listar regra de horários semanais
+* Método de requisição: **GET**
+* Path: **/appointment/weekly**
+* Exemplo de resposta BEM sucedida
+    * Status: **200** | **OK**
+    * Body:
+```json
+[
+    {
+        "days": [
+            "segunda",
+            "quarta",
+            "sexta",
+            "quinta",
+            "sabado"
+        ],
+        "intervals": [
+            {
+                "start": "12:00",
+                "end": "16:00"
+            },
+            {
+                "start": "16:01",
+                "end": "17:00"
             }
         ]
     }
