@@ -1,10 +1,10 @@
 # Endpoints
 
 ##  Adicionar de dia específico
-* metodo de requisição: **POST**
-* path: **/appointment/day**
-* header: **Content-Type : application/json**
-* body: 
+* Método de requisição: **POST**
+* Path: **/appointment/day**
+* Header: **Content-Type : application/json**
+* Body: 
 ```json
 {
   "type" : "day",
@@ -13,8 +13,8 @@
 }
 ```
 * Exemplo de resposta BEM sucedida
-* status: **200** | **OK**
-* body:
+* Status: **200** | **OK**
+* Body:
 ```json
 {
     "id": "zAvq-xrrR",
@@ -28,7 +28,7 @@
 }
 ```
 * Exemplo de resposta MAL sucedida
-* status: **400** | **Bad Rquest**
+* Status: **400** | **Bad Rquest**
 **body** :
 ```json
 {
