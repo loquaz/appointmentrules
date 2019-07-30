@@ -1,39 +1,49 @@
 abstract class BaseModel {
 
-    private _errors: ModelError[] = [];
+    private _error: ModelError;
 
     constructor(){}
 
     /**
-     * Add a model error
+     * Set an error
      * 
-     * @param msg 
+     * @param message 
      * @param field 
-     * @param value 
+     * @param originalValue 
      */
-    addError(msg: string, field: string, value: string) : void {
-        this._errors.push( new ModelError( msg, field, value )  );
+    setError(message: string, field: string, originalValue: string) : void {
+
+        this._error = new ModelError( message, field, originalValue );
+
     }
 
     /**
-     *  Returns all model errors
-     * 
+     *  Return the error 
      */
-    getErrors(): ModelError[] {
-        return this._errors;
+    getError(): string {
+        
+        return this._error.toString();
+
     }
+
 }
 
 class ModelError {
 
-    message : string;
-    field : string;
-    originalValue: string;
+    private _message : string;
+    private _field : string;
+    private _originalValue: string;
 
     constructor(msg: string, field: string, value: string){
-        this.message        = msg;
-        this.field          = field;
-        this.originalValue  = value;
+        this._message        = msg;
+        this._field          = field;
+        this._originalValue  = value;
+    }
+
+    toString(){
+
+        return `${this._message}, {${this._field}}, ${this._originalValue}`;
+
     }
 
 }

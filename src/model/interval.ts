@@ -24,8 +24,6 @@ class Interval extends BaseModel implements IModel{
             return false;
         }
             
-        console.log('interval is valid')
-    
         return true;
     }    
 

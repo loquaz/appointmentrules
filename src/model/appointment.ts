@@ -1,6 +1,6 @@
 import IModel from './imodel';
 import Interval from './interval';
-import AppointmentType from '../appointmentType';
+import AppointmentType from '../common/appointmentType';
 import * as moment from 'moment';
 import BaseModel from './base-model';
 
@@ -19,16 +19,14 @@ class Appointment extends BaseModel implements IModel {
 
     validate(): boolean {
         
-        console.log('appointment.validate()');
-
         /**
-         * The validation depends on the type of appointment 
+         * The validation rules depends on the type of appointment 
          * 
          * if the type is equal to:
          * 
-         * AppointmentType.DAY: then properties <dayDate> and <intervals> are both required
-         * AppointmentType.DAILY: then only property <intervals> is required
-         * AppointmentType.WEEKLY: then only properties  <dayNames> and <intervals> are required 
+         * AppointmentType.DAY: then, properties <dayDate> and <intervals> are both required
+         * AppointmentType.DAILY: then, only property <intervals> is required
+         * AppointmentType.WEEKLY: then, only properties  <dayNames> and <intervals> are required 
          *  
          */
         if( this.type === AppointmentType.DAY ){
@@ -36,27 +34,27 @@ class Appointment extends BaseModel implements IModel {
             let _date = moment(this.dayDate, 'DD-MM-YYYY');
 
             if( this.dayDate === null || !_date.isValid() ){ // validate date
-                this.addError("Invalid date", "day", this.dayDate);
+                this.setError("Invalid date", "day", this.dayDate);
                 return false;
             }
 
         }else if( this.type === AppointmentType.WEEKLY ){
 
             if( this.dayNames === null || this.dayNames.length === 0 ){ // validate date
-                this.addError("Days can\'t be empty", "days", null);
+                this.setError("Days can\'t be empty", "days", null);
                 return false;
             } 
 
         } 
 
         if(this.intervals === null || this.intervals.length === 0){ 
-            this.addError("Appointment intervals can\'t be empty", "intervals", null);
+            this.setError("Appointment intervals can\'t be empty", "intervals", null);
             return false;
         }else{
             let _intervals: Interval[] = this.intervals
             for(let i = 0; i < _intervals.length; i++){
                 if( !_intervals[i].validate() ){
-                    this.addError("Invalid interval", "intervals", _intervals[i].toString());
+                    this.setError( "Invalid interval", "intervals", _intervals[i].toString() );
                     return false;
                 }
             }//for
@@ -70,6 +68,7 @@ class Appointment extends BaseModel implements IModel {
                     }
 
             });
+            
             let _hrAux;
 
             for( let i = 0; i < _shToSort.length; i++ ){
@@ -94,7 +93,7 @@ class Appointment extends BaseModel implements IModel {
 
                     if( _currentEnd.isSameOrAfter( _nextStart ) ){
 
-                        this.addError("Interval conflict", "intervals", _intervals[i].toString() + ' ' + _intervals[i+1].toString() );
+                        this.setError("Interval conflict", "intervals", _intervals[i].toString() + ' ' + _intervals[i+1].toString() );
                         return false;
 
                     }
