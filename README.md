@@ -1,7 +1,8 @@
 # Endpoints
 
 ##  Adicionar de dia específico
-**metodo de requisição **: POST
+**metodo de requisição**: POST
+
 **path**: /appointment/day
 **header**: Content-Type : application/json
 **body** : 
