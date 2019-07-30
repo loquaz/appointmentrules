@@ -1,5 +1,9 @@
 # Endpoints 
    * [Adicionar um dia específico](#add-day)
+   * [Remover um dia específico](#del-day)
+   * [Listar todos os dias disponíveis](#list-all)
+   * [Listar horários disponíveis em intervalo de datas](#list-range)
+   
 
 <a name="add-day"></a>
 
@@ -41,6 +45,7 @@
     "errorMessage": "Day appointment already exists"
 }
 ```
+<a name="del-day"></a>
 
 ##  Remover dia específico
 * Método de requisição: **DELETE**
@@ -59,6 +64,8 @@
     "errorMessage": "resource with id {WWizTAl0g} not found"
 }
 ```
+
+<a name="list-all"></a>
 
 ##  Listar todos os dias disponíveis
 * Método de requisição: **GET**
@@ -97,6 +104,7 @@
     }
 ]
 ```
+<a name="list-range"></a>
 
 ##  Listar horários disponíveis em intervalo de datas
 * Método de requisição: **GET**
