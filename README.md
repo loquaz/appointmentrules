@@ -1,6 +1,6 @@
-# Endpoints
+# Endpoints [Router](#exp_module_koa-router--Router) 
 
-##  Adicionar de dia específico
+##  Adicionar um dia específico
 * Método de requisição: **POST**
 * Path: **/appointment/day**
 * Header: **Content-Type : application/json**
@@ -95,9 +95,9 @@
 ]
 ```
 
-##  Listar horários disponíveis entre um intervalo específico
+##  Listar horários disponíveis em intervalo de datas
 * Método de requisição: **GET**
-* Path: **/appointment/available/:initDate:endDate**
+* Path: **/appointment/available/:initDate/:endDate**
 * Exemplo de resposta BEM sucedida
     * Status: **200** | **OK**
     * Body:
@@ -143,3 +143,5 @@
     "errorMessage": "16-16-2018, 29-07-2018 or both are invalid dates"
 }
 ```
+
+<a name="exp_module_koa-router--Router"></a>
