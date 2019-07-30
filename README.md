@@ -5,14 +5,39 @@ Para a correta instalação siga os passos:
 
 1. Construção da imagem executando o commando na raiz do projeto:
 ```bash
-$ docker build -t cubos .
+$> docker build -t cubos .
 ```
-2. Levantar o container com o comando
+2. Levantar o container com o comando:
 ```bash
-$ docker-compose up -d
+$> docker-compose up -d
+```
+Caso queira subir a aplicação usando nodemon, executar o seguinte comando na raiz do projeto:
+```bash
+$> npm run watch-server
 ```
 
-# Endpoints 
+## Estrutura de diretórios
+
+```bash
+├── dist (arquivos compilados)
+├── node_modules   
+├── src
+│   ├── api (endpoints aqui)   
+│   ├── common
+│   ├── data (storage json e logica de persistencia)
+│   ├── model
+│   ├── repository   
+│   └── service (camada de negocios)
+├── app.ts
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── README.md
+├── package.json
+├── tsconfig.json
+```
+
+## Endpoints 
    * [Adicionar um dia específico](#add-day)
    * [Remover um dia específico](#del-day)
    * [Listar todos os dias disponíveis](#list-all)
