@@ -12,9 +12,9 @@
   "intervals" : [ {"start" : "05:00", "end" : "07:30"} ]
 }
 ```
-**exemplo de resposta bem sucedida**
-**status**: 200 | OK
-**body** :
+* Exemplo de resposta BEM sucedida
+* status: **200** | **OK**
+* body:
 ```json
 {
     "id": "zAvq-xrrR",
@@ -27,8 +27,8 @@
     ]
 }
 ```
-**exemplo de resposta MAL sucedida**
-**status**: 400 | Bad Rquest
+* Exemplo de resposta MAL sucedida
+* status: **400** | **Bad Rquest**
 **body** :
 ```json
 {
