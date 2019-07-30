@@ -3,7 +3,7 @@
    * [Remover um dia específico](#del-day)
    * [Listar todos os dias disponíveis](#list-all)
    * [Listar horários disponíveis em intervalo de datas](#list-range)
-   * [Adicionar horários diariámente](#add-daily)
+   * [Adicionar horários diáriamente](#add-daily)
    * [Remover regra de horários diários](#del-daily)
    * [Listar regra de horários diários](#list-daily)
    * [Adicionar horários semanalmente](#add-weekly)
@@ -159,5 +159,49 @@
     "errorCode": 3,
     "errorType": "Request Error",
     "errorMessage": "16-16-2018, 29-07-2018 or both are invalid dates"
+}
+```
+
+
+<a name="add-daily"></a>
+
+##  Adicionar horários diáriamente
+* Método de requisição: **POST**
+* Path: **/appointment/daily**
+* Header: **Content-Type : application/json**
+* Body: 
+```json
+{
+  "type" : "daily",
+  "intervals" : [{"start" : "08:10", "end" : "09:00"},{"start" : "10:00", "end" : "11:00"}]
+}
+```
+* Exemplo de resposta BEM sucedida
+    * Status: **200** | **OK**
+    * Body:
+```json
+{
+    "id": "aHIxbWJRS",
+    "intervals": [
+        {
+            "start": "08:10",
+            "end": "09:00"
+        },
+        {
+            "start": "10:00",
+            "end": "11:00"
+        }
+    ]
+}
+```
+* Exemplo de resposta MAL sucedida
+    * Status: **400** | **Bad Rquest**
+    * Body:
+```json
+{
+    "status": 400,
+    "errorCode": 2,
+    "errorType": "Resource already exists",
+    "errorMessage": "Daily appointment already exists"
 }
 ```
