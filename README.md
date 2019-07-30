@@ -13,8 +13,8 @@
 }
 ```
 * Exemplo de resposta BEM sucedida
-* Status: **200** | **OK**
-* Body:
+    * Status: **200** | **OK**
+    * Body:
 ```json
 {
     "id": "zAvq-xrrR",
@@ -28,8 +28,8 @@
 }
 ```
 * Exemplo de resposta MAL sucedida
-* Status: **400** | **Bad Rquest**
-**body** :
+    * Status: **400** | **Bad Rquest**
+    * Body:
 ```json
 {
     "status": 400,
