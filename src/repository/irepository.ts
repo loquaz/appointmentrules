@@ -1,6 +1,7 @@
 interface IRepository<T> {
     
     save(model: T) : T;
+    findDayById(id: string) : T;
     findAll(type: string) : T[];
     findByDate(day: string) : T;
     deleteById(id: string, type: string) : boolean;

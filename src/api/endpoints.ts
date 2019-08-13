@@ -18,7 +18,10 @@ endpoints.get('/appointment/days', async (ctx, next) => {
     const serviceAppointment            = ctx.container.get("AppointmentService");
     const appointments: Appointment[]   = serviceAppointment.getAllDays();
     const response                      = appointments.map( appointment => {
+
+        appointment._sortIntervals()
         return appointment.toJsonWithoutId();
+
     }); 
     
     ctx.body = response;
@@ -62,6 +65,7 @@ endpoints.post('/appointment/day', async (ctx, next) => {
             ctx.body        = error;            
 
         }else if( appointmentSaved ){
+            appointmentSaved._sortIntervals();
             ctx.body = appointmentSaved.toJson();
         }
 
@@ -127,6 +131,7 @@ endpoints.get('/appointment/available/:initdate/:enddate', (ctx)=>{
 
             response = appointments.map( appointment =>{
 
+                appointment._sortIntervals();
                 return appointment.toJsonWithoutId();
 
             });
@@ -150,6 +155,7 @@ endpoints.get('/appointment/daily', async (ctx, next) => {
     const serviceAppointment            = ctx.container.get("AppointmentService");
     const appointments: Appointment[]   = serviceAppointment.getDaily();
     const response                      = appointments.map( appointment => {
+        appointment._sortIntervals();
         return appointment.toJsonWithoutId();
     }); 
     
@@ -194,6 +200,7 @@ endpoints.post('/appointment/daily', async (ctx, next) => {
            ctx.body        = error;            
 
        }else if( appointmentSaved ){
+           appointmentSaved._sortIntervals();
            ctx.body = appointmentSaved.toJson();
        }
 
@@ -238,6 +245,7 @@ endpoints.get('/appointment/weekly', async (ctx, next) => {
     const serviceAppointment            = ctx.container.get("AppointmentService");
     const appointments: Appointment[]   = serviceAppointment.getWeekly();
     const response                      = appointments.map( appointment => {
+        appointment._sortIntervals();
         return appointment.toJsonWithoutId();
     }); 
     
@@ -282,6 +290,7 @@ endpoints.post('/appointment/weekly', async (ctx, next) => {
            ctx.body        = error;            
 
        }else if( appointmentSaved ){
+           appointmentSaved._sortIntervals();
            ctx.body = appointmentSaved.toJson();
        }
 

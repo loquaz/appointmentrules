@@ -310,6 +310,10 @@ class JsonDatasource implements IDatasource<Appointment>{
 
         let _collection = this._getCollection( AppointmentType.WEEKLY );
         let _data       = _collection[0];
+
+        if(!_data)
+            return null;
+
         intervals.map( i =>{
             _data['intervals'].push( i.toJson() );
         });
@@ -357,7 +361,7 @@ class JsonDatasource implements IDatasource<Appointment>{
         return _appointment;
     }
 
-    findDayById(id: string){
+    findDayById(id: string) {
 
         let _collection = this._getCollection( AppointmentType.DAY );
         let _day        = null;
@@ -439,7 +443,7 @@ class JsonDatasource implements IDatasource<Appointment>{
         let _initIdx    = -1;
         let _endIdx     = -1;
 
-        for( let i = 0, j = _collection.length - 1 ; i < j ; i++, j-- ){
+        for( let i = 0, j = _collection.length - 1 ; i <= j ; i++, j-- ){
 
             let _dtIni = moment( _collection[i]['day'], 'DD-MM-YYYY' );
             let _dtEnd = moment( _collection[j]['day'], 'DD-MM-YYYY' );

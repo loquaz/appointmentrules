@@ -3,6 +3,7 @@ import Appointment from '../model/appointment';
 import { injectable, inject } from "inversify";
 import IDatasource from '../data/idatasource';
 import Interval from '../model/interval';
+import AppointmentType from '../common/appointmentType';
 
 @injectable()
 class AppointmentRepository implements IRepository<Appointment>{
@@ -23,7 +24,25 @@ class AppointmentRepository implements IRepository<Appointment>{
 
         return this._ds.findAll( type );
     
-    }    
+    }
+    
+    findDayById(id: string) : Appointment {
+
+        const data = this._ds.findDayById( id );
+
+        console.log( data );
+
+        const appointment       = new Appointment();
+        appointment.type        = AppointmentType.DAY;
+        appointment.id          = data['id']
+        appointment.dayDate     = data['day']
+        appointment.intervals   = data['intervals'].map( i =>{
+            return new Interval(i['start'], i['end']);
+        })
+                
+        return appointment;
+
+    }
     
     findByDate(date: string): Appointment {
 
@@ -75,6 +94,8 @@ class AppointmentRepository implements IRepository<Appointment>{
         return this._ds.getAppointmentsBetween( initDate, endDate );
         
     }
+
+    
 
 }
 

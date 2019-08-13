@@ -57,53 +57,171 @@ class Appointment extends BaseModel implements IModel {
                     this.setError( "Invalid interval", "intervals", _intervals[i].toString() );
                     return false;
                 }
-            }//for
+            }//for           
+        }
 
-            // search for conflicts
-            // sort by start
-            let _shToSort = _intervals.map( ( interval, idx ) =>{
-                return { 
-                        "idx" : idx,
-                        "hour" : moment(interval.start, 'HH:mm') 
-                    }
+         
+        return  !this._existsIntervalsConflic();    // returns if exists a conflic
 
-            });
+    }
+
+    /**
+     * Sort intervals
+     */
+    _sortIntervals(){
+
+        
+        let swapped;
+        let n = this.intervals.length - 1;
+
+        do {
+
+            swapped = false;
             
-            let _hrAux;
+            for(let i = 0 ; i < n ; i++) {
 
-            for( let i = 0; i < _shToSort.length; i++ ){
-                for( let j = i+1; j < _shToSort.length; j++ ){
-                
-                    if( _shToSort[j]['hour'].isBefore( _shToSort[i]['hour'] ) ){
+                let _currDate =  moment(this.intervals[i].start, 'HH:mm');
+                let _nextDate =  moment(this.intervals[i+1].start, 'HH:mm'); 
 
-                        _hrAux = this.intervals[ _shToSort[j]['idx'] ];
-                        this.intervals[ _shToSort[j]['idx'] ] = this.intervals[ _shToSort[i]['idx'] ];
-                        this.intervals[ _shToSort[i]['idx'] ] = _hrAux;
+                if( _currDate.isAfter(_nextDate )){
 
-                    }
+                    let _hrAux = this.intervals[ i ];
+                    this.intervals[ i ] = this.intervals[ i + 1 ];
+                    this.intervals[ i + 1 ] = _hrAux;
+                    swapped = true  
+
                 }
+
             }
+            
+        } while (swapped);
 
-            for( let i = 0 ; i < this.intervals.length; i++){
+        //console.log( 'end', this.intervals );
 
-                if( ( i + 1 ) < this.intervals.length ) {
-                    
-                    let _currentEnd = moment( this.intervals[i].end, 'HH:mm' );
-                    let _nextStart  = moment( this.intervals[i+1].start, 'HH:mm' );
+    }
 
-                    if( _currentEnd.isSameOrAfter( _nextStart ) ){
+    /**
+     * Verifies intervals conflicts
+     */
+    _existsIntervalsConflic() : boolean {
 
-                        this.setError("Interval conflict", "intervals", _intervals[i].toString() + ' ' + _intervals[i+1].toString() );
-                        return false;
+        console.log('_existsIntervalsConflic() before sort', this.intervals);
 
-                    }
+        this._sortIntervals();        
+
+        console.log('_existsIntervalsConflic() after sort', this.intervals);
+        
+        for( let i = 0 ; i < this.intervals.length; i++){
+
+            if( ( i + 1 ) < this.intervals.length ) {
+                
+                let _currentEnd = moment( this.intervals[i].end, 'HH:mm' );
+                let _nextStart  = moment( this.intervals[i+1].start, 'HH:mm' );
+
+                if( _currentEnd.isSameOrAfter( _nextStart ) ){
+
+                    //console.log("===============================================");
+                    this.setError("Interval conflict", "intervals", this.intervals[i].toString() + ' ' + this.intervals[i+1].toString() );
+                    return true;
+
                 }
-
             }
 
         }
+        return false;
+    }
 
-        return true;
+    /**
+     * Add missing intervals
+     * 
+     * @param suppliedIntervals 
+     */
+    validateIntervalsAgainst(suppliedIntervals: Interval[]){
+
+        // merge the instance and supplied unique intervals
+        const instanceIntervals             = this.intervals;
+        const uniqueInstaceIntervals        = this._removeEqualIntervals(instanceIntervals, suppliedIntervals);
+        const uniqueSuppliedIntervals       = this._removeEqualIntervals(suppliedIntervals, instanceIntervals);
+        const uniqueIntervals: Interval[]   = [];
+
+        uniqueInstaceIntervals.forEach( interval =>{
+            uniqueIntervals.push( interval );
+        });
+
+        uniqueSuppliedIntervals.forEach( interval =>{
+            uniqueIntervals.push( interval );
+        });
+
+        this.intervals = uniqueIntervals;
+           
+        // validates 
+        let isValid = this.validate();
+        
+        if( uniqueInstaceIntervals.length === 0 ){
+            for(let i = 0; i < instanceIntervals.length ; i++){
+                for(let j = 0 ; j < suppliedIntervals.length ; j++){
+                    if(instanceIntervals[i].toString() === suppliedIntervals[j].toString()){
+
+                        this.setError("Interval Conflict", "Interval", instanceIntervals[i].toString());
+                        isValid = false;
+                        break;
+                    }
+                }
+                if(!isValid) break; 
+            }
+        }
+        /*        
+        console.log('----------------------------------------------');
+        console.log(`type [ ${this.type} ]`);
+        console.log(" ** Instance Intervals ", instanceIntervals);        
+        console.log(" ** Supplied Intervals ", suppliedIntervals);
+        console.log(" ^==^ Unique Intance Intervals ", uniqueInstaceIntervals);
+        console.log(" ** Unique Supplied Intervals ", uniqueSuppliedIntervals);
+        console.log(" == Unique Intervals ", uniqueIntervals);
+        
+        console.log('----------------------------------------------');
+        */
+        
+        // if validates, store the original intervals back into the instance
+        if(isValid){            
+            this.intervals = uniqueInstaceIntervals;
+            this._sortIntervals();
+        }
+        
+        return isValid;
+    }
+
+    /**
+     * Returns intervals that exists only in the from parameter
+     * 
+     * @param from
+     * @param whatRemove 
+     */
+    _removeEqualIntervals(from: Interval[], whatRemove: Interval[]){
+
+        let _missingIntervals   = [];        
+        let _missing            = true;
+
+        for( let i = 0 ; i < from.length ; i++ ){
+
+            for( let j = 0 ; j < whatRemove.length ; j++){
+
+                if( from[i].toString() === whatRemove[j].toString() ){
+
+                    _missing = false;
+                    break;                          
+
+                }
+            }
+
+            if( _missing ) {
+
+                _missingIntervals.push( from[i] );                        
+
+            }
+            _missing = true;                    
+        }
+        return _missingIntervals;
     }
 
     toJson(): Object {

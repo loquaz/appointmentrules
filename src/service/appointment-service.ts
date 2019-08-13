@@ -7,6 +7,7 @@ import Interval from "../model/interval";
 import AppointmentType from "../common/appointmentType";
 import BaseError from "../common/base-error";
 import { ErrorTypes, ErrorCodes } from "../common/application-error";
+import * as moment from 'moment';
 
 @injectable()
 class AppointmentService implements IService<Appointment> {
@@ -73,172 +74,352 @@ class AppointmentService implements IService<Appointment> {
      */
     create( appointment: Appointment ): Appointment {
         
-        // if the appointment already exists 
-        // stores only the missing intervals
-        if( appointment.type === AppointmentType.DAY ){
+        /** BEGIN FINAL REFACTORING **/
+        let _errorOccurred  = false;
+        let _errorMessage   = '';
 
-            console.log('0000');
-
-            let _day = this._repo.findByDate( appointment.dayDate );
-            
-            if( _day ){
-
-                let _storedIntervals    = _day.intervals;
-                let _postedIntervals    = appointment.intervals;                
-                let _missingIntervals   = this.getMissingIntervals( _postedIntervals, _storedIntervals );
-                                
-                if( _missingIntervals.length > 0 ){
-                   
-                    // merge the missing interval with the current stored 
-                    // to verify if any conflict will occurs
-                    _missingIntervals.map( interval=>{
-
-                        _day.intervals.push(interval);
-
-                    });
-
-                    if(!_day.validate()){
-                        
-                        const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _day.getError() );
-                        this.setError( error );
-                        return appointment;
-                    
-                    }else{
-
-                        return this._repo.addIntervalsToDay( _day.id, _missingIntervals );
-                    
-                    }
-
-                } else {
-
-                    const error = new BaseError( ErrorTypes.CONFLICT, ErrorCodes.CONFLICT, "Day appointment already exists" );
-                    this.setError( error );
-                    return appointment;
-
-                }
-
-            }else{
-
-                return this._repo.save( appointment );
-
-            } 
-
-        }else if( appointment.type === AppointmentType.DAILY ){
-
-            // if the daily appointment already exists 
-            // add only the missing intervals
-            let _daily = this._repo.getDaily();
-
-            if( _daily ){
-
-                let _storedIntervals    = _daily.intervals;
-                let _postedIntervals    = appointment.intervals;                
-                let _missingIntervals   = this.getMissingIntervals( _postedIntervals, _storedIntervals );
-
-                if( _missingIntervals.length > 0 ){
-
-                    // merge the missing interval with the current stored 
-                    // to verify if any conflict will occurs
-                    _missingIntervals.map( interval=>{
-
-                        _daily.intervals.push(interval);
-                        
-                    });
-
-                    if(!_daily.validate()){
-                        
-                        const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _daily.getError() );
-                        this.setError( error );
-                        return appointment;
-                    
-                    }else{
-
-                        return this._repo.addIntervalsToDaily( _missingIntervals );
-                    
-                    }
-
-
-                } else {
-                    
-                    const error = new BaseError( ErrorTypes.CONFLICT, ErrorCodes.CONFLICT, "Daily appointment already exists" );
-                    this.setError( error );
-                    return appointment;
-
-                }
-
-            } else {
-
-                return this._repo.save( appointment );
-
-            }
-
-        } else if ( appointment.type === AppointmentType.WEEKLY ) { 
-
-            let _weekly = this._repo.getWeekly();
-
-            if( _weekly ){
-
-                let _storedIntervals    = _weekly.intervals;
-                let _postedIntervals    = appointment.intervals;
-                let _storedDays         = _weekly.dayNames;
-                let _postedDays         = appointment.dayNames;                
-                let _missingIntervals   = this.getMissingIntervals( _postedIntervals, _storedIntervals );
-                let _missingDays        = this.getMissingDays( _postedDays, _storedDays );
-
-                if( _missingDays.length === 0 && _missingIntervals.length === 0 ){
-
-                    const error = new BaseError( ErrorTypes.CONFLICT, ErrorCodes.CONFLICT, "Weekly appointment already exists" );
-                    this.setError( error );
-                    return appointment;
-
-                }else{
-
-                    let _appointment: Appointment;
-                
-                    if( _missingDays.length > 0 ) {
-
-                        _appointment = this._repo.addDaysToWeekly( _missingDays ); 
-
-                    }
-
-                    if( _missingIntervals.length > 0 ) {
-
-                        // merge the missing interval with the current stored 
-                        // to verify if any conflict will occurs
-                        _missingIntervals.map( interval=>{
-
-                            _weekly.intervals.push(interval);
-                        
-                        });
-
-                        if(!_weekly.validate()){
-                        
-                            const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _weekly.getError() );
-                            this.setError( error );
-                            return _appointment;
-                    
-                        }else{
-
-                            _appointment = this._repo.addIntervalsToWeekly( _missingIntervals );
-                    
-                        }
-
-                    }
-
-                    return _appointment;
-
-                }
-
-            } else {
-
-                return this._repo.save( appointment );
-
-            }
-
-         }
+        let _storedDay              = this._repo.findByDate( appointment.dayDate );
+        let _storedDays             = this._repo.findAll( AppointmentType.DAY );
+        let _storedDaily            = this._repo.getDaily();
+        let _storedWeekly           = this._repo.getWeekly();
+        let _addMissingIntervals    = false;
         
-        // if we reach this point a wrong type was sent 
-        return null;
+        if( appointment.type === AppointmentType.DAY ) {
+
+            if( _storedDay ) {
+
+                if( !appointment.validateIntervalsAgainst( _storedDay.intervals ) ){
+                    
+                    _errorOccurred  = true;
+                    _errorMessage   = 'Conflict with anoter day rule: ' + appointment.getError();                    
+                    
+                } else {
+
+                    _addMissingIntervals = true
+
+                } 
+            }
+                
+            if( !_errorOccurred && _storedDaily ) {
+
+                if( !appointment.validateIntervalsAgainst( _storedDaily.intervals ) ) {
+                    _errorOccurred  = true;
+                    _errorMessage   = 'Conflict with daily rule: ' + appointment.getError();
+
+                }
+
+            }
+
+            if( !_errorOccurred && _storedWeekly ) {
+
+                // tests if the posted day is covered by the weekly rule
+                const _postedDayNumber      = moment(appointment.dayDate, 'DD-MM-YYYY').day();
+                const _weeklyDayNames       = _storedWeekly.dayNames;
+                const _weeklyIntervals      = _storedWeekly.intervals;
+
+                for(let i = 0 ; i < _weeklyDayNames.length ; i++){
+
+                    if(_postedDayNumber === this._getDayNumberFromDayName( _weeklyDayNames[i] ) ){
+                                
+                        if( !appointment.validateIntervalsAgainst( _weeklyIntervals ) ){
+                            _errorOccurred  = true;
+                            _errorMessage   = `Conflict with weekly rule for [ ${_weeklyDayNames[i]} ]: ` + appointment.getError();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if( _errorOccurred ) {
+
+                const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _errorMessage );
+                this.setError( error );
+                return appointment;
+
+            }
+            
+            /***** PERSIST ****/
+            
+            let savedDay;
+
+            if( _addMissingIntervals ) {
+
+                savedDay = this._repo.addIntervalsToDay( _storedDay.id, appointment.intervals );
+                
+            } else {
+                
+                savedDay = this._repo.save( appointment );                               
+
+            }
+
+            if(_storedDaily && _storedDaily.intervals)
+                    this._repo.addIntervalsToDay( savedDay.id, _storedDaily.intervals );
+
+            if(_storedWeekly && _storedWeekly.intervals){
+                    
+                const _postedDayNumber  = moment(appointment.dayDate, 'DD-MM-YYYY').day();
+                const _weeklyDayNames   = _storedWeekly.dayNames;
+                    
+                for(let i = 0 ; i < _weeklyDayNames.length ; i++){
+
+                    if(_postedDayNumber === this._getDayNumberFromDayName( _weeklyDayNames[i] ) ){
+                        this._repo.addIntervalsToDay( savedDay.id, _storedWeekly.intervals );               
+                            
+                    }
+                }                    
+            }
+
+            return this._repo.findDayById( savedDay.id );
+                                    
+           // return; //debug
+        } else if (appointment.type === AppointmentType.DAILY ) {
+
+            if ( _storedDaily ) {
+
+                if( !appointment.validateIntervalsAgainst( _storedDaily.intervals ) ) {
+
+                    _errorOccurred  = true;
+                    _errorMessage   = 'Conflict with another daily rule: ' + appointment.getError();
+
+                } else {
+
+                    _addMissingIntervals = true;
+
+                }
+
+            }
+           
+            if ( !_errorOccurred && _storedDays.length > 0 ) {
+
+                for( let i = 0 ; i < _storedDays.length ; i ++) {
+
+                    if( !appointment.validateIntervalsAgainst( _storedDays[i].intervals ) ) {
+
+                        _errorOccurred  = true;
+                        _errorMessage   = `Conflic with day rule for [ ${_storedDays[i].dayDate} ]: ` + appointment.getError();
+                        break;                        
+
+                    }
+
+                }
+
+            }
+
+            if ( !_errorOccurred && _storedWeekly ) {
+
+                if( !appointment.validateIntervalsAgainst( _storedWeekly.intervals ) ) {
+
+                    _errorOccurred  = true;
+                    _errorMessage   = 'Conflic daily rule : ' + appointment.getError();
+
+                }
+
+            }
+
+            if( _errorOccurred ) {
+
+                const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _errorMessage );
+                this.setError( error );
+                return appointment;
+
+            }
+
+            let savedDaily;
+
+            if( _addMissingIntervals ) {
+
+                this._repo.addIntervalsToWeekly( appointment.intervals );
+                savedDaily = this._repo.addIntervalsToDaily( appointment.intervals );
+
+            } else {
+
+                savedDaily = this._repo.save( appointment );
+                this._repo.addIntervalsToWeekly( appointment.intervals );
+
+            }
+
+            for( let i = 0 ; i < _storedDays.length ; i ++) {
+
+                this._repo.addIntervalsToDay( _storedDays[i].id, appointment.intervals ); 
+
+            }
+
+            return savedDaily;
+
+        } else if ( appointment.type === AppointmentType.WEEKLY ) {
+
+            let _postedDayNames     = appointment.dayNames;
+            let _daysIdsCollection  = [];
+            let _dayNumber;
+
+            if( _storedWeekly ) {
+
+                let _storedDayNames = _storedWeekly.dayNames;                                
+                let _missingDays    = this.getMissingDays( _postedDayNames, _storedDayNames );
+
+                if( !appointment.validateIntervalsAgainst( _storedWeekly.intervals ) ) {
+
+                    _errorOccurred  = true;
+                    _errorMessage   = `Conflict with another weekly rule: ` + appointment.getError();
+
+                } else {
+
+                    _addMissingIntervals = true;
+
+                }
+
+                if( !_errorOccurred && _storedDaily ) {
+
+                    if( !appointment.validateIntervalsAgainst( _storedDaily.intervals ) ){
+
+                        _errorOccurred  = true;
+                        _errorMessage   = `Conflict with daily rule: ` + appointment.getError();
+
+                    }
+
+                }
+
+                if( !_errorOccurred && _storedDays ) {
+               
+                    if( _missingDays.length > 0 ){
+
+                        for( let i = 0 ; i < _missingDays.length ; i++ ){
+                        
+                            _dayNumber = this._getDayNumberFromDayName( _missingDays[i] );
+
+                            for( let j = 0 ; j < _storedDays.length ; j++ ){
+
+                                if( _dayNumber === moment( _storedDays[j].dayDate, 'DD-MM-YYYY').day() ) {
+
+                                if ( !appointment.validateIntervalsAgainst( _storedDays[j].intervals ) ) {
+
+                                        _errorOccurred  = true;
+                                        _errorMessage   = `Conflict with day rule for [ ${_missingDays[i]} ${_storedDays[j].dayDate}]: ` + appointment.getError();
+                                        break;  
+
+                                    } else {
+
+                                        _daysIdsCollection.push( _storedDays[j].id );
+
+                                    }
+                                }
+                            }
+                        }                  
+                    }
+                }
+
+                if( _errorOccurred ){
+
+                    const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _errorMessage );
+                    this.setError( error );
+                    return appointment;
+
+                }
+                
+                for( let i = 0 ; i < _daysIdsCollection.length ; i++ ) {
+
+                    this._repo.addIntervalsToDay( _daysIdsCollection[i], appointment.intervals )
+
+                }
+
+                return this._repo.addIntervalsToWeekly( appointment.intervals );
+
+            } else {
+
+                if( !_errorOccurred && _storedDaily ) {
+
+                    if( !appointment.validateIntervalsAgainst( _storedDaily.intervals ) ){
+
+                        _errorOccurred  = true;
+                        _errorMessage   = `Conflict with daily rule: ` + appointment.getError();
+
+                    }
+
+                }
+
+                if( !_errorOccurred && _storedDays ) {
+
+                    for( let i = 0 ; i < _postedDayNames.length ; i++ ){
+                        
+                        _dayNumber = this._getDayNumberFromDayName( _postedDayNames[i] );
+
+                        for( let j = 0 ; j < _storedDays.length ; j++ ){
+
+                            if( _dayNumber === moment( _storedDays[j].dayDate, 'DD-MM-YYYY').day() ) {
+
+                                if ( !appointment.validateIntervalsAgainst( _storedDays[j].intervals ) ) {
+                                    
+                                    _errorOccurred  = true;
+                                    _errorMessage   = `Conflict with day rule for [ ${_postedDayNames[i]} ${_storedDays[j].dayDate}]: ` + appointment.getError();
+                                    break;  
+
+                                } else {
+
+                                    _daysIdsCollection.push( _storedDays[j].id );
+
+                                }
+                            }
+                        }
+                    }
+                
+                }
+
+                if( _errorOccurred ){
+
+                    const error = new BaseError( ErrorTypes.VALIDATION_ERROR, ErrorCodes.VALIDATION_ERROR, _errorMessage );
+                    this.setError( error );
+                    return appointment;
+
+                }
+
+                for( let i = 0 ; i < _daysIdsCollection.length ; i++ ) {
+
+                    this._repo.addIntervalsToDay( _daysIdsCollection[i], appointment.intervals )
+
+                }
+
+                return this._repo.save( appointment );
+
+            }
+
+        }       
+
+    }
+        
+
+    /**
+     * Returns an integer that represents the day in a week
+     * 
+     * @param dayName 
+     */
+    _getDayNumberFromDayName(dayName: string) : number {
+
+        const _dayName          = dayName.toLocaleLowerCase();
+        const segundaRegex      = /segunda([-\s]feira)?/;
+        const tercaRegex        = /ter[cç]a([-\s]feira)?/;
+        const quartaRegex       = /quarta([-\s]feira)?/;
+        const quintaRegex       = /quinta([-\s]feira)?/;
+        const sextaRegex        = /sexta([-\s]feira)?/;
+        const sabadoRegex       = /s[aá]bado/;
+        
+        if(_dayName === "domingo"){ 
+            return 0;
+        } else if ( _dayName.match(segundaRegex) ) {
+            return 1;
+        } else if ( _dayName.match(tercaRegex) ) {
+            return 2;
+        } else if ( _dayName.match(quartaRegex) ) {
+            return 3;
+        } else if ( _dayName.match(quintaRegex) ) {
+            return 4;
+        } else if ( _dayName.match(sextaRegex) ) {
+            return 5;
+        } else if ( _dayName.match(sabadoRegex) ) {
+            return 6;
+        }
+
+        return -1;
+
     }
 
     deleteDayById(id: string, type: string) : boolean {

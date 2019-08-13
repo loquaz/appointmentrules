@@ -1,7 +1,1 @@
-{
-    "appointments": {
-        "days": [],
-        "daily": [],
-        "weekly": []
-    }
-}
+{"appointments":{"days":[{"id":"pfSjT9SMO","day":"11-09-2019","intervals":[{"start":"03:30","end":"04:00"},{"start":"08:30","end":"09:00"},{"start":"09:30","end":"10:00"},{"start":"19:00","end":"20:00"},{"start":"20:30","end":"21:00"},{"start":"05:00","end":"06:00"},{"start":"07:00","end":"08:00"},{"start":"23:30","end":"23:50"}]},{"id":"yPnW1f180","day":"13-09-2019","intervals":[{"start":"10:30","end":"11:00"},{"start":"20:30","end":"21:00"},{"start":"05:00","end":"06:00"},{"start":"07:00","end":"08:00"},{"start":"23:30","end":"23:50"}]},{"id":"H3yjhm6KK","day":"15-09-2019","intervals":[{"start":"10:30","end":"11:00"},{"start":"20:30","end":"21:00"},{"start":"05:00","end":"06:00"},{"start":"07:00","end":"08:00"}]}],"daily":[{"id":"htKMd1n3x","intervals":[{"start":"05:00","end":"06:00"},{"start":"07:00","end":"08:00"}]}],"weekly":[{"id":"bw8HXEw_K","days":["quarta","sexta"],"intervals":[{"start":"23:30","end":"23:50"}]}]}}
